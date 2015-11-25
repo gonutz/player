@@ -52,11 +52,11 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		path, err := url.QueryUnescape(r.URL.Path)
-		if len(path) >= 2 {
+		if len(path) < 2 || err != nil {
+			log(err)
+			http.Redirect(w, r, "/|"+url.QueryEscape(workingDir), http.StatusFound)
+		} else {
 			path = path[2:]
-		}
-		log(err)
-		if err == nil {
 			info, err := os.Stat(path)
 			log(err)
 			if err == nil {
@@ -67,8 +67,8 @@ func serve(w http.ResponseWriter, r *http.Request) {
 					log(player.playVideo(path))
 				}
 			}
+			w.Write([]byte(htmlList(wdFiles)))
 		}
-		w.Write([]byte(htmlList(wdFiles)))
 	}
 }
 
@@ -79,7 +79,7 @@ func htmlList(list fileList) string {
 		if f.isDir {
 			suffix = " ..."
 		}
-		items += "\n<li><a href=\"" + url.QueryEscape("|" + f.path) + "\">" + f.path +
+		items += "\n<li><a href=\"" + url.QueryEscape("|"+f.path) + "\">" + f.path +
 			suffix + "</a></li>"
 	}
 	return `<html>
