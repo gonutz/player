@@ -52,6 +52,9 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		path, err := url.QueryUnescape(r.URL.Path)
+		if len(path) >= 2 {
+			path = path[2:]
+		}
 		log(err)
 		if err == nil {
 			info, err := os.Stat(path)
@@ -76,7 +79,7 @@ func htmlList(list fileList) string {
 		if f.isDir {
 			suffix = " ..."
 		}
-		items += "\n<li><a href=\"" + url.QueryEscape(f.path) + "\">" + f.path +
+		items += "\n<li><a href=\"" + url.QueryEscape("|" + f.path) + "\">" + f.path +
 			suffix + "</a></li>"
 	}
 	return `<html>
