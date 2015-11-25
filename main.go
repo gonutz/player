@@ -1,26 +1,75 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
+)
+
+var (
+	player  = &videoPlayer{}
+	mux     sync.Mutex
+	wdFiles fileList
 )
 
 func main() {
+	listDir()
 	http.HandleFunc("/", serve)
 	http.ListenAndServe(":8080", nil)
 }
 
 func serve(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(htmlList(listDir())))
+	if player.running {
+		w.Write([]byte(videoControls))
+		if r.FormValue("pause") != "" {
+			log(player.playPause())
+		}
+		if r.FormValue("stop") != "" {
+			log(player.stopVideo())
+		}
+		if r.FormValue("lower") != "" {
+			log(player.volumeDown())
+		}
+		if r.FormValue("louder") != "" {
+			log(player.volumeUp())
+		}
+		if r.FormValue("backSmall") != "" {
+			log(player.back30Seconds())
+		}
+		if r.FormValue("forwardSmall") != "" {
+			log(player.forward30Seconds())
+		}
+	} else {
+		path, err := url.QueryUnescape(r.URL.Path[1:])
+		if err == nil {
+			info, err := os.Stat(path)
+			if err == nil {
+				if info.IsDir() {
+					workingDir = path
+					listDir()
+				} else {
+					log(player.playVideo(path))
+				}
+			}
+		}
+		w.Write([]byte(htmlList(wdFiles)))
+	}
 }
 
 func htmlList(list fileList) string {
 	items := ""
 	for _, f := range list {
-		items += "\n<li>" + f.path + "</li>"
+		suffix := ""
+		if f.isDir {
+			suffix = " ..."
+		}
+		items += "\n<li><a href=\"" + url.QueryEscape(f.path) + "\">" + f.path +
+			suffix + "</a></li>"
 	}
 	return `<html>
 	<body>
@@ -30,23 +79,22 @@ func htmlList(list fileList) string {
 </html>`
 }
 
-func listDir() fileList {
-	var files fileList
+func listDir() {
+	wdFiles = nil
 	filepath.Walk(workingDir, func(path string, info os.FileInfo, err error) error {
 		if path == workingDir {
 			return nil
 		}
 
 		if err == nil {
-			files = append(files, file{path, info.IsDir()})
+			wdFiles = append(wdFiles, file{path, info.IsDir()})
 		}
 		if info != nil && info.IsDir() {
 			return filepath.SkipDir
 		}
 		return nil
 	})
-	sort.Sort(files)
-	return files
+	sort.Sort(wdFiles)
 }
 
 type file struct {
@@ -73,10 +121,25 @@ func (f fileList) Swap(i, j int) {
 	f[i], f[j] = f[j], f[i]
 }
 
-func activatePath(f file) {
-	if f.isDir {
-		workingDir = f.path
-	} else {
-		// TODO play movie
+const videoControls = `<html>
+	<body>
+		<form action="/" name=input method="GET">
+		<input type=submit value="Pause/Play" name=pause>
+		<input type=submit value="Stop" name=stop>
+		<br>
+		<input type=submit value="<- 30s" name=backSmall>
+		<input type=submit value="30s ->" name=forwardSmall>
+		<br>
+		<input type=submit value="<- 10min" name=backBig>
+		<input type=submit value="10min ->" name=forwardBig>
+		<br>
+		<input type=submit value="Volume-" name=lower>
+		<input type=submit value="Volume+" name=louder>
+	</body>
+</html>`
+
+func log(a interface{}) {
+	if a != nil {
+		fmt.Println(a)
 	}
 }
