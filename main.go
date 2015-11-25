@@ -44,6 +44,12 @@ func serve(w http.ResponseWriter, r *http.Request) {
 		if r.FormValue("forwardSmall") != "" {
 			log(player.forward30Seconds())
 		}
+		if r.FormValue("backBig") != "" {
+			log(player.back10Minutes())
+		}
+		if r.FormValue("forwardBig") != "" {
+			log(player.forward10Minutes())
+		}
 	} else {
 		path, err := url.QueryUnescape(r.URL.Path)
 		log(err)
@@ -129,11 +135,11 @@ const videoControls = `<html>
 		<input type=submit value="Pause/Play" name=pause>
 		<input type=submit value="Stop" name=stop>
 		<br>
-		<input type=submit value="<- 30s" name=backSmall>
-		<input type=submit value="30s ->" name=forwardSmall>
+		<input type=submit value="<-30s" name=backSmall>
+		<input type=submit value="30s->" name=forwardSmall>
 		<br>
-		<input type=submit value="<- 10min" name=backBig>
-		<input type=submit value="10min ->" name=forwardBig>
+		<input type=submit value="<-10min" name=backBig>
+		<input type=submit value="10min->" name=forwardBig>
 		<br>
 		<input type=submit value="Volume-" name=lower>
 		<input type=submit value="Volume+" name=louder>

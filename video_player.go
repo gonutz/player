@@ -59,6 +59,14 @@ func (v *videoPlayer) forward30Seconds() error {
 	return v.writeIfRunning(string([]byte{27, 91, 67}))
 }
 
+func (v *videoPlayer) back10Minutes() error {
+	return v.writeIfRunning(string([]byte{27, 91, 66}))
+}
+
+func (v *videoPlayer) forward10Minutes() error {
+	return v.writeIfRunning(string([]byte{27, 91, 65}))
+}
+
 func (v *videoPlayer) writeIfRunning(msg string) (err error) {
 	if v.running {
 		_, err = v.in.Write([]byte(msg))
