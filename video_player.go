@@ -35,8 +35,9 @@ func (v *videoPlayer) playVideo(path string) (err error) {
 }
 
 func (v *videoPlayer) stopVideo() error {
+	err := v.writeIfRunning("q")
 	v.running = false
-	return v.writeIfRunning("q")
+	return err
 }
 
 func (v *videoPlayer) playPause() error {
