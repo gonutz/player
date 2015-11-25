@@ -83,6 +83,13 @@ func htmlList(list fileList) string {
 			suffix + "</a></li>"
 	}
 	return `<html>
+	<head>
+		<style>
+			body {
+				font-size: 200%;
+			}
+		</style>
+	</head>
 	<body>
 		<ul style="list-style-type:none">` + items +
 		`		</ul>
@@ -133,6 +140,14 @@ func (f fileList) Swap(i, j int) {
 }
 
 const videoControls = `<html>
+	<head>
+		<style>
+			input[type=submit] {
+				width: 30vw; height: 20vh;
+				font-size: 300%;
+			}
+		</style>
+	</head>
 	<body>
 		<form action="/" name=input method="GET">
 		<input type=submit value="Pause/Play" name=pause>
