@@ -45,9 +45,11 @@ func serve(w http.ResponseWriter, r *http.Request) {
 			log(player.forward30Seconds())
 		}
 	} else {
-		path, err := url.QueryUnescape(r.URL.Path[1:])
+		path, err := url.QueryUnescape(r.URL.Path)
+		log(err)
 		if err == nil {
 			info, err := os.Stat(path)
+			log(err)
 			if err == nil {
 				if info.IsDir() {
 					workingDir = path
