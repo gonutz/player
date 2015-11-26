@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	player  = &videoPlayer{}
+	player  videoPlayer = &omxplayer{}
 	mux     sync.Mutex
 	wdFiles fileList
 )
@@ -24,8 +24,7 @@ func main() {
 }
 
 func serve(w http.ResponseWriter, r *http.Request) {
-	if player.running {
-		w.Write([]byte(videoControls))
+	if player.isRunning() {
 		if r.FormValue("pause") != "" {
 			log(player.playPause())
 		}
@@ -67,8 +66,13 @@ func serve(w http.ResponseWriter, r *http.Request) {
 					log(player.playVideo(path))
 				}
 			}
-			w.Write([]byte(htmlList(wdFiles)))
 		}
+	}
+
+	if player.isRunning() {
+		w.Write([]byte(videoControls))
+	} else {
+		w.Write([]byte(htmlList(wdFiles)))
 	}
 }
 
