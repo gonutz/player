@@ -20,7 +20,7 @@ var (
 func main() {
 	listDir()
 	http.HandleFunc("/", serve)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":80", nil)
 }
 
 func serve(w http.ResponseWriter, r *http.Request) {
