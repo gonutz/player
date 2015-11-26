@@ -70,18 +70,22 @@ func (v *omxplayer) volumeUp() error {
 }
 
 func (v *omxplayer) back30Seconds() error {
+	// left arrow, ASCII sequence: Esc[D
 	return v.writeIfRunning(string([]byte{27, 91, 68}))
 }
 
 func (v *omxplayer) forward30Seconds() error {
+	// right arrow, ASCII sequence: Esc[C
 	return v.writeIfRunning(string([]byte{27, 91, 67}))
 }
 
 func (v *omxplayer) back10Minutes() error {
+	// down arrow, ASCII sequence: Esc[B
 	return v.writeIfRunning(string([]byte{27, 91, 66}))
 }
 
 func (v *omxplayer) forward10Minutes() error {
+	// up arrow, ASCII sequence: Esc[A
 	return v.writeIfRunning(string([]byte{27, 91, 65}))
 }
 
