@@ -116,6 +116,7 @@ func listDir() {
 		}
 		return nil
 	})
+	wdFiles = append(wdFiles, file{filepath.Dir(workingDir), true})
 	sort.Sort(wdFiles)
 }
 
