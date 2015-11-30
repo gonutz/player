@@ -18,6 +18,7 @@ var (
 )
 
 func main() {
+	player = &stubVideoPlayer{}
 	listDir()
 	http.HandleFunc("/", serve)
 	http.ListenAndServe(":8080", nil)
@@ -25,40 +26,56 @@ func main() {
 
 func serve(w http.ResponseWriter, r *http.Request) {
 	if player.isRunning() {
+		redirect := false
 		if r.FormValue("pause") != "" {
 			log(player.playPause())
+			redirect = true
 		}
 		if r.FormValue("stop") != "" {
 			log(player.stopVideo())
+			redirect = true
 		}
 		if r.FormValue("lower") != "" {
 			log(player.volumeDown())
+			redirect = true
 		}
 		if r.FormValue("louder") != "" {
 			log(player.volumeUp())
+			redirect = true
 		}
 		if r.FormValue("backSmall") != "" {
 			log(player.back30Seconds())
+			redirect = true
 		}
 		if r.FormValue("forwardSmall") != "" {
 			log(player.forward30Seconds())
+			redirect = true
 		}
 		if r.FormValue("backBig") != "" {
 			log(player.back10Minutes())
+			redirect = true
 		}
 		if r.FormValue("forwardBig") != "" {
 			log(player.forward10Minutes())
+			redirect = true
+		}
+		if redirect {
+			http.Redirect(w, r, "", http.StatusMovedPermanently)
 		}
 	} else {
 		path, err := url.QueryUnescape(r.URL.Path)
-		if len(path) < 2 || err != nil {
+		if len(path) < 3 || err != nil {
 			log(err)
-			http.Redirect(w, r, "/|"+url.QueryEscape(workingDir), http.StatusFound)
+			http.Redirect(w, r, "/|"+url.QueryEscape(workingDir),
+				http.StatusMovedPermanently)
 		} else {
 			path = path[2:]
 			info, err := os.Stat(path)
 			log(err)
-			if err == nil {
+			if err != nil {
+				http.Redirect(w, r, "/|"+url.QueryEscape(workingDir),
+					http.StatusMovedPermanently)
+			} else {
 				if info.IsDir() {
 					workingDir = path
 					listDir()
