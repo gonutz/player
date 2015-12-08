@@ -18,7 +18,6 @@ var (
 )
 
 func main() {
-	player = &stubVideoPlayer{}
 	listDir()
 	http.HandleFunc("/", serve)
 	http.ListenAndServe(":80", nil)
@@ -60,7 +59,7 @@ func serve(w http.ResponseWriter, r *http.Request) {
 			redirect = true
 		}
 		if redirect {
-			http.Redirect(w, r, "", http.StatusMovedPermanently)
+			http.Redirect(w, r, "/|"+url.QueryEscape(workingDir), http.StatusMovedPermanently)
 		}
 	} else {
 		path, err := url.QueryUnescape(r.URL.Path)
